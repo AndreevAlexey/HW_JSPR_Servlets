@@ -2,10 +2,12 @@ package ru.netology.repository;
 
 import ru.netology.model.Post;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 // Stub
 public class PostRepository {
@@ -26,7 +28,7 @@ public class PostRepository {
   }
 
   public List<Post> all() {
-    return (List<Post>) posts.values();
+    return new ArrayList<>(posts.values());
   }
 
   public Optional<Post> getById(long id) {
