@@ -3,15 +3,14 @@ package ru.netology.repository;
 import ru.netology.model.Post;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
+
 
 // Stub
 public class PostRepository {
-  private ConcurrentHashMap<Long, Post> posts = new ConcurrentHashMap<>();
+  private final ConcurrentHashMap<Long, Post> posts = new ConcurrentHashMap<>();
   private volatile long postsCnt = 0;
 
   private synchronized void increseCnt() {
@@ -49,10 +48,7 @@ public class PostRepository {
   }
 
   public void removeById(long id) {
-    // пост присутствует в мар
-    if(posts.containsKey(id)) {
-      // удаляем
-      posts.remove(id);
-    }
+    // удаляем
+    posts.remove(id);
   }
 }
