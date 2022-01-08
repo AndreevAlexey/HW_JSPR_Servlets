@@ -13,13 +13,13 @@ public class PostRepository {
   private final ConcurrentHashMap<Long, Post> posts = new ConcurrentHashMap<>();
   private volatile long postsCnt = 0;
 
-  private synchronized void increseCnt() {
+  private synchronized void increaseCnt() {
     postsCnt++;
   }
 
   private Post addPost(Post post) {
     // новый id
-    increseCnt();
+    increaseCnt();
     post.setId(postsCnt);
     // добавляем в мар
     posts.put(postsCnt, post);

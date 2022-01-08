@@ -1,9 +1,9 @@
 package ru.netology.servlet;
 
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import ru.netology.constants.ReqType;
 import ru.netology.controller.PostController;
-import ru.netology.repository.PostRepository;
-import ru.netology.service.PostService;
+
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -13,14 +13,12 @@ import java.util.List;
 
 public class MainServlet extends HttpServlet {
   private PostController controller;
-  private final static String PATH = "/api/posts";
   private final List<ReqType> validReqTypes = Arrays.asList(ReqType.GET, ReqType.POST, ReqType.DELETE);
 
   @Override
   public void init() {
-    final var repository = new PostRepository();
-    final var service = new PostService(repository);
-    controller = new PostController(service);
+    final var context = new AnnotationConfigApplicationContext(JavaConfig.class);
+    controller = context.getBean(PostController.class);
   }
 
   @Override
@@ -32,13 +30,13 @@ public class MainServlet extends HttpServlet {
       final ReqType reqType = ReqType.getByName(method);
       long id = 0L;
       // проверка типа запроса
-      if(reqType == null || !validReqTypes.contains(reqType) || !path.matches(PATH)) {
+      if(reqType == null || !validReqTypes.contains(reqType) || !path.contains("/api/posts")) {
         resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
         return;
       }
       // проверка на id в запросе
-      if(path.matches(PATH+"\\d+")) {
-        id = Long.parseLong(path.substring(path.lastIndexOf("/")));
+      if(path.matches("/api/posts/\\d+")) {
+        id = Long.parseLong(path.substring(path.lastIndexOf("/")+1));
       }
       // маршрутизатор
       switch (reqType) {
