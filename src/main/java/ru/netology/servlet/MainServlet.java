@@ -13,7 +13,6 @@ import java.util.List;
 
 public class MainServlet extends HttpServlet {
   private PostController controller;
-  private final static String PATH = "/api/posts";
   private final List<ReqType> validReqTypes = Arrays.asList(ReqType.GET, ReqType.POST, ReqType.DELETE);
 
   @Override
@@ -32,13 +31,13 @@ public class MainServlet extends HttpServlet {
       final ReqType reqType = ReqType.getByName(method);
       long id = 0L;
       // проверка типа запроса
-      if(reqType == null || !validReqTypes.contains(reqType) || !path.matches(PATH)) {
+      if(reqType == null || !validReqTypes.contains(reqType) || !path.contains("/api/posts")) {
         resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
         return;
       }
       // проверка на id в запросе
-      if(path.matches(PATH+"\\d+")) {
-        id = Long.parseLong(path.substring(path.lastIndexOf("/")));
+      if(path.matches("/api/posts/\\d+")) {
+        id = Long.parseLong(path.substring(path.lastIndexOf("/") + 1));
       }
       // маршрутизатор
       switch (reqType) {
