@@ -7,24 +7,30 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 
 // Stub
 @Repository
 public class PostRepository {
   private final ConcurrentHashMap<Long, Post> posts = new ConcurrentHashMap<>();
-  private volatile long postsCnt = 0;
+  private final AtomicLong postsCnt = new AtomicLong(0);
 
-  private synchronized void increseCnt() {
-    postsCnt++;
+  // получить id нового поста
+  private long getNewPostId(long id) {
+    long rez = id;
+    while(posts.containsKey(rez) || rez == 0) {
+      rez = postsCnt.incrementAndGet();
+    }
+    return rez;
   }
 
   private Post addPost(Post post) {
     // новый id
-    increseCnt();
-    post.setId(postsCnt);
+    long id = getNewPostId(post.getId());
+    post.setId(id);
     // добавляем в мар
-    posts.put(postsCnt, post);
+    posts.put(id, post);
     return post;
   }
 
@@ -38,12 +44,12 @@ public class PostRepository {
 
   public Post save(Post post) {
     long id = post.getId();
-    // пост присутствует в мар
+    // пост уже присутствует в мар
     if(posts.containsKey(id)) {
-      // заменяем
+      // обновляем
       posts.replace(id, post);
-      // иначе просто добавляем с новым id
     } else {
+      // добавляем
       return addPost(post);
     }
     return post;
