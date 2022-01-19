@@ -1,6 +1,5 @@
 package ru.netology.servlet;
 
-import ru.netology.constants.ReqType;
 import ru.netology.controller.PostController;
 import ru.netology.repository.PostRepository;
 import ru.netology.service.PostService;
@@ -13,7 +12,10 @@ import java.util.List;
 
 public class MainServlet extends HttpServlet {
   private PostController controller;
-  private final List<ReqType> validReqTypes = Arrays.asList(ReqType.GET, ReqType.POST, ReqType.DELETE);
+  private final String GET = "GET";
+  private final String POST = "POST";
+  private final String DELETE = "DELETE";
+  private final List<String> validReqTypes = Arrays.asList(GET, POST, DELETE);
 
   @Override
   public void init() {
@@ -24,51 +26,48 @@ public class MainServlet extends HttpServlet {
 
   @Override
   protected void service(HttpServletRequest req, HttpServletResponse resp) {
+
     // если деплоились в root context, то достаточно этого
     try {
       final String path = req.getRequestURI();
       final String method = req.getMethod();
-      final ReqType reqType = ReqType.getByName(method);
+
       long id = 0L;
       // проверка типа запроса
-      if(reqType == null || !validReqTypes.contains(reqType) || !path.contains("/api/posts")) {
+      if(method == null || !validReqTypes.contains(method) || !path.contains("/api/posts")) {
         resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
         return;
       }
+
       // проверка на id в запросе
       if(path.matches("/api/posts/\\d+")) {
         id = Long.parseLong(path.substring(path.lastIndexOf("/") + 1));
       }
-      // маршрутизатор
-      switch (reqType) {
-        // GET запрос
-        case GET:
-          // есть id
-          if (id != 0) {
-            // получить пост по id
-            controller.getById(id, resp);
-          } else {
-            // получить список всех постов
-            controller.all(resp);
-          }
-          break;
-        // POST запрос
-        case POST:
-          // сохранить пост
-          controller.save(req.getReader(), resp);
-          break;
-        // DELETE запрос
-        case DELETE:
-          // есть id
-          if (id != 0)
-            // удалить пост
-            controller.removeById(id, resp);
-          else
-            // ошибочный запрос
-            resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
-          break;
-      }
 
+      try {
+        switch (method) {
+          // GET
+          case GET:
+            // есть id
+            if (id != 0) controller.getById(id, resp); // получить пост по id
+            else controller.all(resp); // получить список всех постов
+            break;
+          // POST
+          case POST:
+            controller.save(req.getReader(), resp); // сохранить пост
+            break;
+          // DELETE
+          case DELETE:
+            // есть id
+            if (id != 0) controller.removeById(id, resp); // удалить пост
+            else resp.setStatus(HttpServletResponse.SC_NOT_FOUND); // ошибочный запрос
+            break;
+        }
+      } catch (Exception exp) {
+        // ошибочный запрос
+        exp.printStackTrace();
+        resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+      }
     } catch (Exception e) {
       e.printStackTrace();
       resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
