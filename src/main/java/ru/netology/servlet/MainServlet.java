@@ -1,6 +1,7 @@
 package ru.netology.servlet;
 
 import ru.netology.controller.PostController;
+import ru.netology.exception.NotFoundException;
 import ru.netology.repository.PostRepository;
 import ru.netology.service.PostService;
 
@@ -44,30 +45,31 @@ public class MainServlet extends HttpServlet {
         id = Long.parseLong(path.substring(path.lastIndexOf("/") + 1));
       }
 
-      try {
-        switch (method) {
-          // GET
-          case GET:
-            // есть id
-            if (id != 0) controller.getById(id, resp); // получить пост по id
-            else controller.all(resp); // получить список всех постов
-            break;
-          // POST
-          case POST:
-            controller.save(req.getReader(), resp); // сохранить пост
-            break;
-          // DELETE
-          case DELETE:
-            // есть id
-            if (id != 0) controller.removeById(id, resp); // удалить пост
-            else resp.setStatus(HttpServletResponse.SC_NOT_FOUND); // ошибочный запрос
-            break;
-        }
-      } catch (Exception exp) {
-        // ошибочный запрос
-        exp.printStackTrace();
-        resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+      switch (method) {
+        // GET
+        case GET:
+          // есть id
+          if (id != 0) controller.getById(id, resp); // получить пост по id
+          else controller.all(resp); // получить список всех постов
+          break;
+        // POST
+        case POST:
+          controller.save(req.getReader(), resp); // сохранить пост
+          break;
+        // DELETE
+        case DELETE:
+          // есть id
+          if (id != 0) controller.removeById(id, resp); // удалить пост
+          else resp.setStatus(HttpServletResponse.SC_NOT_FOUND); // ошибочный запрос
+          break;
       }
+
+
+    } catch (NotFoundException exp) {
+      // ошибочный запрос
+      exp.printStackTrace();
+      resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+
     } catch (Exception e) {
       e.printStackTrace();
       resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
